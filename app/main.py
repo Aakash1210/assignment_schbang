@@ -126,3 +126,7 @@ def get_ad_metrics(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+@app.get("/")
+def home():
+    return {"message": "FastAPI with APScheduler is running!","url":"http://127.0.0.1:8000/docs"}

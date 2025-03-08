@@ -28,3 +28,6 @@ alembic upgrade head
 
 - Run the FastAPI Application (run inside the /app )
 uvicorn main:app --reload
+
+- Test the API using swagger 
+http://127.0.0.1:8000/docs
