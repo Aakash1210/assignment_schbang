@@ -24,7 +24,7 @@ db_dependency=Annotated[Session,Depends(get_db)]
     
 app = FastAPI(lifespan=lifespan)
 
-@app.post("/insert-metrics-and-metadata/")
+@app.post("/insert-metrics-and-metadata/",description="Run this first to add dummy data")
 async def insert_metadata_and_metrics(
     db: Session = Depends(get_db),
 ):
@@ -63,10 +63,10 @@ async def insert_metadata_and_metrics(
 
 @app.get("/ad-metrics/", response_model=List[schemas.AdMetricsResponse])
 def get_ad_metrics(
-    start_date: date = Query(..., description="Start date for filtering"),
-    end_date: date = Query(..., description="End date for filtering"),
-    region_id: Optional[int] = Query(None, description="Region ID"),
-    platform_id: Optional[int] = Query(None, description="Platform ID"),
+    start_date: date = Query(..., description="Start date for filtering",example="2021-01-01"),
+    end_date: date = Query(..., description="End date for filtering",example="2025-01-01"),
+    region: Optional[str] = Query(None, description="Region Name",example="Asia"),
+    platform: Optional[str] = Query(None, description="Platform Name",example="Google"),
     db: Session = Depends(get_db)):
     try:
         if start_date >end_date:
@@ -93,10 +93,10 @@ def get_ad_metrics(
             .filter(DimDate.date_value.between(start_date, end_date))
         )
         
-        if region_id:
-            query = query.filter(FactAdMetricsDaily.region_id == region_id)
-        if platform_id:
-            query = query.filter(FactAdMetricsDaily.platform_id == platform_id)
+        if region:
+            query = query.filter(DimRegion.region_name == region)
+        if platform:
+            query = query.filter(DimPlatform.platform_name == platform)
 
         result = query.all()
 

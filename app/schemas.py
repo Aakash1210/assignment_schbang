@@ -3,13 +3,6 @@ from datetime import date
 from typing import Optional
 from decimal import Decimal
 
-    
-class AdMetricsRequest(BaseModel):
-    start_date: date
-    end_date: date
-    region_id: Optional[int] = None
-    platform_id: Optional[int] = None
-
 
 
 class AdMetricsResponse(BaseModel):
