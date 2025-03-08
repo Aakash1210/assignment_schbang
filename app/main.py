@@ -30,22 +30,26 @@ async def insert_metadata_and_metrics(
 ):
     try:
         # Insert metadata
-        db.bulk_save_objects(
-            [DimDate(date_value=datetime.strptime(date, "%Y-%m-%d")) for date in metadata["dates"]]
-        )
-        db.bulk_save_objects([DimRegion(region_name=region) for region in metadata["regions"]])
-        db.bulk_save_objects([DimAgeGroup(age_range=age) for age in metadata["age_groups"]])
-        db.bulk_save_objects([DimGender(gender_name=gender) for gender in metadata["genders"]])
-        db.bulk_save_objects([DimPlatform(platform_name=platform) for platform in metadata["platforms"]])
-        db.bulk_save_objects([DimPlacement(placement_name=placement) for placement in metadata["placements"]])
-        db.bulk_save_objects([DimDeviceType(device_type_name=device) for device in metadata["device_types"]])
-        db.commit()
+        data_count = db.query(FactAdMetricsDaily).count()
+        if data_count==0:
+            db.bulk_save_objects(
+                [DimDate(date_value=datetime.strptime(date, "%Y-%m-%d")) for date in metadata["dates"]]
+            )
+            db.bulk_save_objects([DimRegion(region_name=region) for region in metadata["regions"]])
+            db.bulk_save_objects([DimAgeGroup(age_range=age) for age in metadata["age_groups"]])
+            db.bulk_save_objects([DimGender(gender_name=gender) for gender in metadata["genders"]])
+            db.bulk_save_objects([DimPlatform(platform_name=platform) for platform in metadata["platforms"]])
+            db.bulk_save_objects([DimPlacement(placement_name=placement) for placement in metadata["placements"]])
+            db.bulk_save_objects([DimDeviceType(device_type_name=device) for device in metadata["device_types"]])
+            db.commit()
 
-        # Insert ad metrics data
-        for data in ad_metrics_data:
-            ad_metric = FactAdMetricsDaily(**data.dict())
-            db.add(ad_metric)
-        db.commit()
+            # Insert ad metrics data
+            for data in ad_metrics_data:
+                    ad_metric = FactAdMetricsDaily(**data)
+                    db.add(ad_metric)
+            db.commit()
+        else:
+            return{"message":"already Dummy Data Exists"} 
 
         return {"message":"inserted Dummy Data"} 
 
