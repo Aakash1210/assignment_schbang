@@ -13,14 +13,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from alembic.config import Config
 from alembic import command
 
-def run_migrations():
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.start()
-    # run_migrations()
     yield
     scheduler.shutdown()
 db_dependency=Annotated[Session,Depends(get_db)]
@@ -28,10 +24,12 @@ db_dependency=Annotated[Session,Depends(get_db)]
     
 app = FastAPI(lifespan=lifespan)
 
-async def insert_metadata_and_metrics():
-    print("Inserting metadata and ad metrics data...")
-    db = db_dependency
+@app.post("/insert-metrics-and-metadata/")
+async def insert_metadata_and_metrics(
+    db: Session = Depends(get_db),
+):
     try:
+        # Insert metadata
         db.bulk_save_objects(
             [DimDate(date_value=datetime.strptime(date, "%Y-%m-%d")) for date in metadata["dates"]]
         )
@@ -43,17 +41,18 @@ async def insert_metadata_and_metrics():
         db.bulk_save_objects([DimDeviceType(device_type_name=device) for device in metadata["device_types"]])
         db.commit()
 
+        # Insert ad metrics data
         for data in ad_metrics_data:
-            ad_metric = FactAdMetricsDaily(**data)
+            ad_metric = FactAdMetricsDaily(**data.dict())
             db.add(ad_metric)
         db.commit()
 
-        print("Metadata and ad metrics inserted successfully!")
+        return {"message":"inserted Dummy Data"} 
 
     except Exception as e:
         db.rollback()
-        print(f"Error inserting data: {e}")
-
+        raise HTTPException(status_code=500, detail=f"Error inserting data: {e}")
+    
     finally:
         db.close()
 
