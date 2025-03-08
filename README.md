@@ -17,6 +17,9 @@ source .venv/bin/activate
 - Install Dependencies
 pip install -r requirements.txt
 
+- Create the Database(in postgressql)
+
+
 - Configure Environment Variables (change into .env)
 DATABASE_URL=postgresql://youruser:yourpassword@localhost:5432/yourdbname
 
