@@ -23,9 +23,3 @@ alembic upgrade head
 
 - Run the FastAPI Application
 uvicorn app.main:app --reload
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Aakash1218/assignment_schbang.git
-cd assignment_schbang
